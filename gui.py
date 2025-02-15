@@ -4,6 +4,7 @@ from tkinter import font, messagebox, filedialog
 from lng_encrypt import lngEncrypt
 from lng_decrypt import lngDecrypt
 from ws2_extract import ws2Extract
+from lua_patch import luaPatch
 
 root = tk.Tk()
 root.title("AdvHD 1.9 Tools GUI")
@@ -50,22 +51,20 @@ def lngEncryptComponents():
                 lngEncrypt(inputStream, outputStream, int(key, 16))
         doAction(_run, infile.get(), outfile.get(), key.get())
 
-    # key.trace_add("write", lambda *_: key.set(key.get().upper()))
-
     components.append(tk.Frame(root))
     components.append(tk.Frame(root))
     components.append(tk.Frame(root))
 
-    components.append(tk.Label(root, text="Input file:"))
+    components.append(tk.Label(root, text="Input file (.txt):"))
     components.append(tk.Entry(components[0], textvariable=infile))
     components.append(tk.Button(components[0], text="...", command=lambda: selectFile(infile)))
 
-    components.append(tk.Label(root, text="Output file:"))
+    components.append(tk.Label(root, text="Output file (.lng):"))
     components.append(tk.Entry(components[1], textvariable=outfile))
     components.append(tk.Button(components[1], text="...", command=lambda: selectFile(outfile)))
 
     components.append(tk.Label(components[2], text="Key:"))
-    components.append(tk.Entry(components[2], textvariable=key, validate="key", validatecommand=(vcmd, "%P", "%S")))
+    components.append(tk.Entry(components[2], textvariable=key, width=2, validate="key", validatecommand=(vcmd, "%P", "%S")))
 
     components[3].pack(anchor="w")
     components[0].pack(fill="x")
@@ -96,11 +95,11 @@ def lngDecryptComponents():
     components.append(tk.Frame(root))
     components.append(tk.Frame(root))
 
-    components.append(tk.Label(root, text="Input file:"))
+    components.append(tk.Label(root, text="Input file (.lng):"))
     components.append(tk.Entry(components[0], textvariable=infile))
     components.append(tk.Button(components[0], text="...", command=lambda: selectFile(infile)))
 
-    components.append(tk.Label(root, text="Output file:"))
+    components.append(tk.Label(root, text="Output file (.txt):"))
     components.append(tk.Entry(components[1], textvariable=outfile))
     components.append(tk.Button(components[1], text="...", command=lambda: selectFile(outfile)))
 
@@ -131,15 +130,15 @@ def ws2ExtractComponents():
     components.append(tk.Frame(root))
     components.append(tk.Frame(root))
 
-    components.append(tk.Label(root, text="Input file:"))
+    components.append(tk.Label(root, text="Input file (.ws2):"))
     components.append(tk.Entry(components[0], textvariable=infile))
     components.append(tk.Button(components[0], text="...", command=lambda: selectFile(infile)))
 
-    components.append(tk.Label(root, text="Output file (text):"))
+    components.append(tk.Label(root, text="Output file (.txt):"))
     components.append(tk.Entry(components[1], textvariable=textoutfile))
     components.append(tk.Button(components[1], text="...", command=lambda: selectFile(textoutfile)))
 
-    components.append(tk.Label(root, text="Output file (name):"))
+    components.append(tk.Label(root, text="Output file (NameTable.txt):"))
     components.append(tk.Entry(components[2], textvariable=nameoutfile))
     components.append(tk.Button(components[2], text="...", command=lambda: selectFile(nameoutfile)))
 
@@ -157,6 +156,39 @@ def ws2ExtractComponents():
     components[2].pack(fill="x")
     components[10].pack(side="left", fill="x", expand=True)
     components[11].pack(side="right")
+
+    button.configure(command=run)
+
+def luaPatchComponents():
+    infile = tk.StringVar()
+    outfile = tk.StringVar()
+
+    def run():
+        def _run(inputFile, outputFile):
+            with open(inputFile, "rb") as inputStream, open(outputFile, "wb") as outputStream:
+                luaPatch(inputStream, outputStream)
+        doAction(_run, infile.get(), outfile.get())
+
+    components.append(tk.Frame(root))
+    components.append(tk.Frame(root))
+
+    components.append(tk.Label(root, text="Input file (LegacyGame.lua):"))
+    components.append(tk.Entry(components[0], textvariable=infile))
+    components.append(tk.Button(components[0], text="...", command=lambda: selectFile(infile)))
+
+    components.append(tk.Label(root, text="Output file (.lua):"))
+    components.append(tk.Entry(components[1], textvariable=outfile))
+    components.append(tk.Button(components[1], text="...", command=lambda: selectFile(outfile)))
+
+    components[2].pack(anchor="w")
+    components[0].pack(fill="x")
+    components[3].pack(side="left", fill="x", expand=True)
+    components[4].pack(side="right")
+
+    components[5].pack(anchor="w")
+    components[1].pack(fill="x")
+    components[6].pack(side="left", fill="x", expand=True)
+    components[7].pack(side="right")
 
     button.configure(command=run)
 
@@ -179,10 +211,12 @@ def itemSelected(event):
             lngDecryptComponents()
         case 2:
             ws2ExtractComponents()
+        case 3:
+            luaPatchComponents()
     button.place(relx=1.0, rely=1.0, x=-10, y=-10, anchor="se")
 
 listbox = tk.Listbox(root, bd=0, font=getFont(15), width=15)
-listbox.insert(0, "encrypt lng", "decrypt lng", "extract from ws2")
+listbox.insert(0, "encrypt lng", "decrypt lng", "extract from ws2", "patch lua")
 listbox.bind("<<ListboxSelect>>", itemSelected)
 listbox.pack(side="left", fill="y")
 
