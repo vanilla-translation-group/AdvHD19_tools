@@ -16,6 +16,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("infile", type=argparse.FileType("r"))
     parser.add_argument("outfile", type=argparse.FileType("wb"))
-    parser.add_argument("key", type=lambda x: int(x, 16))
+    parser.add_argument("key", type=lambda x: int(x, 16) % 256)
     args = parser.parse_args()
     lngEncrypt(args.infile, args.outfile, args.key)
