@@ -4,6 +4,7 @@ from tkinter import font, messagebox, filedialog
 from lng_encrypt import lngEncrypt
 from lng_decrypt import lngDecrypt
 from ws2_extract import ws2Extract
+from ptf_encrypt import ptfEncrypt
 from ptf_decrypt import ptfDecrypt
 from lua_patch import luaPatch
 
@@ -160,6 +161,48 @@ def ws2ExtractComponents():
 
     button.configure(command=run)
 
+def ptfEncryptComponents():
+    infile = tk.StringVar()
+    outfile = tk.StringVar()
+    key = tk.StringVar()
+
+    def run():
+        def _run(inputFile, outputFile, key):
+            with open(inputFile, "rb") as inputStream, open(outputFile, "wb") as outputStream:
+                ptfEncrypt(inputStream, outputStream, int(key, 16))
+        doAction(_run, infile.get(), outfile.get(), key.get())
+
+    components.append(tk.Frame(root))
+    components.append(tk.Frame(root))
+    components.append(tk.Frame(root))
+
+    components.append(tk.Label(root, text="Input file (.ttf):"))
+    components.append(tk.Entry(components[0], textvariable=infile))
+    components.append(tk.Button(components[0], text="...", command=lambda: selectFile(infile)))
+
+    components.append(tk.Label(root, text="Output file (.ptf):"))
+    components.append(tk.Entry(components[1], textvariable=outfile))
+    components.append(tk.Button(components[1], text="...", command=lambda: selectFile(outfile)))
+
+    components.append(tk.Label(components[2], text="Key:"))
+    components.append(tk.Entry(components[2], textvariable=key, width=2, validate="key", validatecommand=(vcmd, "%P", "%S")))
+
+    components[3].pack(anchor="w")
+    components[0].pack(fill="x")
+    components[4].pack(side="left", fill="x", expand=True)
+    components[5].pack(side="right")
+
+    components[6].pack(anchor="w")
+    components[1].pack(fill="x")
+    components[7].pack(side="left", fill="x", expand=True)
+    components[8].pack(side="right")
+
+    components[2].pack(fill="x")
+    components[9].pack(side="left")
+    components[10].pack(side="left")
+
+    button.configure(command=run)
+
 def ptfDecryptComponents():
     infile = tk.StringVar()
     outfile = tk.StringVar()
@@ -255,13 +298,15 @@ def itemSelected(event):
         case 2:
             ws2ExtractComponents()
         case 3:
-            ptfDecryptComponents()
+            ptfEncryptComponents()
         case 4:
+            ptfDecryptComponents()
+        case 5:
             luaPatchComponents()
     button.place(relx=1.0, rely=1.0, x=-10, y=-10, anchor="se")
 
 listbox = tk.Listbox(root, bd=0, font=getFont(15), width=15)
-listbox.insert(0, "encrypt lng", "decrypt lng", "extract from ws2", "decrypt PTF", "patch lua")
+listbox.insert(0, "encrypt lng", "decrypt lng", "extract from ws2", "encrypt PTF", "decrypt PTF", "patch lua")
 listbox.bind("<<ListboxSelect>>", itemSelected)
 listbox.pack(side="left", fill="y")
 
