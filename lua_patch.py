@@ -23,6 +23,15 @@ def luaPatch(inputStream: io.BufferedIOBase, outputStream: io.BufferedIOBase) ->
                 count *= 4
                 content[47] = (count & 15) << 4
                 content[48] += count >> 4
+                index = 0
+                while (index := content.find(b"Sys_c_", index)) != -1:
+                    if content[index - 2] != 0x04:
+                        continue
+                    length = content[index - 1]
+                    content[index + 4:index + length - 3] = content[index + 6:index + length - 1]
+                    content[index - 1] = length - 2
+                    index += length - 3
+                    del content[index:index + 2]
                 outputStream.write(magic)
                 outputStream.write(content)
                 return
