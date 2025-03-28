@@ -27,6 +27,12 @@ def ws2Extract(inputStream: io.BufferedIOBase, textOutputStream: io.TextIOWrappe
                 option = content[content.rfind(b"\0", 0, index) + 1:index].decode("shift_jis")
                 textOutputStream.write(f"{option}\n")
             continue
+        elif index + 6 < length and content[index:index + 6] == b"\x14\x00\x00\x00\x00\x00":
+            index += 6
+            text = content[index:content.find(b"\0", index)].decode("ascii")
+            index += len(text)
+            textOutputStream.write(f"{text}\n")
+            continue
         index += 1
     nameOutputStream.seek(0, 0)
     while (name := nameOutputStream.readline()) and (name := name.split()[0]):
